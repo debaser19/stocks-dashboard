@@ -1,6 +1,6 @@
-from flask import Flask
+from flask import Flask, render_template
 import pymongo
-import datetime
+
 
 import config
 
@@ -20,8 +20,11 @@ def main():
     # for item in result:
     #     print(item)
     # print('hotdog')
-    return f"Net Liq: {balance_data['net-liquidating-value']}"
-
+    return render_template(
+        'index.html',
+        title='Stonks!',
+        net_liq=balance_data['net-liquidating-value']
+        )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port='5001')
