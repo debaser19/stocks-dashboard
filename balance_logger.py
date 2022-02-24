@@ -1,5 +1,7 @@
 import asyncio
-from sre_constants import GROUPREF_EXISTS
+from pprint import pprint
+import datetime
+import pymongo
 
 from tastyworks.models.session import TastyAPISession
 from tastyworks.models.trading_account import TradingAccount
@@ -15,21 +17,27 @@ async def get_positions(account, session):
 
 async def main(session: TastyAPISession, streamer: DataStreamer):
 	accounts = await TradingAccount.get_remote_accounts(session)
-	roth = accounts[0]
+	# roth = accounts[0]
 	trading = accounts[1]
-	# print(f'Accounts available: {accounts}')
 
 	balances = await trading.get_balance(session)
-	net_liq = balances['net-liquidating-value']
+	pprint(balances)
 
-	print(net_liq)
 	positions = await get_positions(trading, session)
-	
 	for position in positions:
-		print(f'Symbol: {position["symbol"]}')
-		print(f'Price: {position["close-price"]}')
-		print(f'Quantity: {position["quantity"]}')
+		pprint(position)
 
+	client = pymongo.MongoClient(config.mongodb_connection)
+	db = client['account_data']
+	my_collection = db['account_data']
+
+	account_record = {
+		"Timestamp": datetime.datetime.now(),
+		"Balance Data": balances,
+		"Positions Data": positions
+	}
+
+	my_collection.insert_one(account_record)
 
 
 if __name__ == '__main__':
